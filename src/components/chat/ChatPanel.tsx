@@ -40,7 +40,7 @@ export function ChatPanel({
   const [busy, setBusy] = React.useState(false);
   const [processingVideo, setProcessingVideo] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [hasAutoSent, setHasAutoSent] = React.useState(false);
+  const hasAutoSent = React.useRef(false);
   const lastAutoSentQuery = React.useRef<string | null>(null);
 
   // Sync initialMessages when they change - important for loading conversation history
@@ -58,7 +58,7 @@ export function ChatPanel({
       setConversationId(initialConversationId);
       // Reset auto-send flag when conversation changes
       if (initialConversationId !== conversationId) {
-        setHasAutoSent(false);
+        hasAutoSent.current = false;
         lastAutoSentQuery.current = null;
       }
     }
@@ -68,29 +68,24 @@ export function ChatPanel({
   // Only send once per unique query to prevent duplicate calls
   React.useEffect(() => {
     if (
-      initialQuery && 
-      !conversationId && 
-      !hasAutoSent && 
-      !busy && 
+      initialQuery &&
+      !conversationId &&
+      !hasAutoSent.current &&
+      !busy &&
       !processingVideo &&
       lastAutoSentQuery.current !== initialQuery // Prevent duplicate sends of same query
     ) {
       console.log("ChatPanel: Auto-sending initial query:", initialQuery);
-      setHasAutoSent(true);
+      hasAutoSent.current = true;
       lastAutoSentQuery.current = initialQuery;
-      
-      // Use setTimeout to avoid calling during render
-      const timeoutId = setTimeout(() => {
-        void sendToAgent(initialQuery);
-      }, 100); // Small delay to ensure component is fully mounted
-      
-      // Cleanup timeout if component unmounts
-      return () => {
-        clearTimeout(timeoutId);
-      };
+
+      // Safe to call directly: effects already run after render/commit,
+      // so no setTimeout is needed (and a timer here would get cancelled
+      // by React StrictMode's dev-only double-invoke of effect cleanup).
+      void sendToAgent(initialQuery);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuery, conversationId, hasAutoSent, busy, processingVideo]);
+  }, [initialQuery, conversationId, busy, processingVideo]);
 
   async function sendToAgent(prompt: string) {
     setError(null);
