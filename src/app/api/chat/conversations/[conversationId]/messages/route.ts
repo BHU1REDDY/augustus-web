@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { API_BASE } from "@/lib/config";
-import type { ConversationMessage, SendMessageRequest, SendMessageResponse } from "@/lib/types";
+import type { ConversationMessage } from "@/lib/types";
 
 const TOKEN_COOKIE = "augustus_token";
 
@@ -107,70 +107,6 @@ export async function GET(
       );
     }
     
-    return NextResponse.json(
-      { error: errorMsg },
-      { status: 500 }
-    );
-  }
-}
-
-/**
- * POST /api/chat/conversations/[conversationId]/messages
- * Sends a message and triggers Q&A pipeline, returns user + assistant messages
- * Body: { content: string }
- */
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ conversationId: string }> }
-) {
-  try {
-    const { conversationId } = await params;
-    const cookieHeader = req.headers.get("cookie") || "";
-    const token = parseCookie(cookieHeader)[TOKEN_COOKIE];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Unauthorized: missing token." },
-        { status: 401 }
-      );
-    }
-
-    const body = (await req.json()) as SendMessageRequest;
-    if (!body.content || typeof body.content !== "string") {
-      return NextResponse.json(
-        { error: "Field `content` (string) is required." },
-        { status: 400 }
-      );
-    }
-
-    const backendUrl = `${API_BASE}/chat/conversations/${conversationId}/query`;
-
-    const res = await fetch(backendUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ query: body.content }),
-      credentials: "include",
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      const errorMsg = (data as { detail?: string; error?: string }).detail || 
-                      (data as { detail?: string; error?: string }).error || 
-                      `Request failed (status ${res.status})`;
-      return NextResponse.json(
-        { error: errorMsg },
-        { status: res.status }
-      );
-    }
-
-    const response = (await res.json()) as SendMessageResponse;
-    return NextResponse.json(response, { status: 200 });
-  } catch (err) {
-    console.error("POST /api/chat/conversations/[id]/messages error:", err);
-    const errorMsg = err instanceof Error ? err.message : "Failed to send message";
     return NextResponse.json(
       { error: errorMsg },
       { status: 500 }

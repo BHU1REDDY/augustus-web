@@ -1,72 +1,7 @@
 // lib/types.ts
 // Shared interfaces matching FastAPI schemas
 
-export interface User {
-    id: string;
-    username: string;
-    email: string;
-    is_active: boolean;
-    scopes?: string[];
-    created_at?: string;
-  }
-  
-  export interface TokenPayload {
-    access_token: string;
-    token_type: "bearer";
-    exp?: number;
-  }
-  
-  export interface Session {
-    session_id: string;
-    user_id: string;
-    current_video_id: string | null;
-    current_video_url: string | null;
-    is_active: boolean;
-    created_at: string;
-    last_activity: string;
-  }
-  
-  export interface Message {
-    id: string;
-    session_id: string;
-    message_index: number;
-    message_type: "human" | "ai" | "system" | "tool";
-    content: string;
-    tool_name?: string;
-    tool_success?: boolean;
-    created_at: string;
-  }
-  
-  export interface AgentQueryRequest {
-    query: string;
-    url?: string;
-    session_id?: string;
-  }
-  
-  export interface AgentQueryResponse {
-    answer: string;
-    session_id: string;
-    video_context?: string;
-    tool_name?: string;
-  }
-  
-  // Schema 2 types for video conversations
-  export interface VideoConversation {
-    conversation_id: string;
-    user_id: string;
-    video_id: string;
-    video_url: string;
-    video_title: string;
-    created_at: string;
-    last_message_at: string;
-    message_count: number;
-    last_user_message: string | null;
-    last_assistant_message: string | null;
-    is_pinned: boolean;
-    synopsis_preview?: string | null;
-  }
-
-  export interface ConversationMessage {
+export interface ConversationMessage {
     id: string;
     conversation_id: string;
     user_id: string;
@@ -77,26 +12,6 @@ export interface User {
     content_length: number;
     tokens_estimate?: number | null;
     created_at: string;
-  }
-
-  // API request/response types for chat endpoints
-  export interface CreateConversationRequest {
-    videoUrl?: string;
-    videoId?: string;
-  }
-
-  export interface CreateConversationResponse {
-    conversation: VideoConversation;
-  }
-
-  export interface SendMessageRequest {
-    content: string;
-  }
-
-  export interface SendMessageResponse {
-    user_message: ConversationMessage;
-    assistant_message: ConversationMessage;
-    conversation: VideoConversation;
   }
 
   // V2 API types (backend_reference)

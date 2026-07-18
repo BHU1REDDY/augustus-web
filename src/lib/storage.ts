@@ -80,34 +80,4 @@ export function updateConversation(
   }
 }
 
-/**
- * Get a specific conversation by ID
- */
-export function getConversation(conversationId: string): StoredConversation | null {
-  const stored = getStoredConversations();
-  return stored.find(c => c.conversation_id === conversationId) || null;
-}
-
-/**
- * Remove a conversation from localStorage
- */
-export function removeConversation(conversationId: string): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const stored = getStoredConversations();
-    const updated = stored.filter(c => c.conversation_id !== conversationId);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  } catch (err) {
-    console.error("Failed to remove conversation:", err);
-  }
-}
-
-/**
- * Clear all stored conversations
- */
-export function clearConversations(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
-}
 

@@ -21,12 +21,3 @@ if (!validateUrl(API_BASE)) {
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "http://localhost:3000";
-
-/**
- * Helper to build a full backend URL path.
- * Example: apiUrl("/token") -> "http://127.0.0.1:8000/token"
- */
-export function apiUrl(path: string) {
-  if (path.startsWith("http")) return path;
-  return `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
-}
